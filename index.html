@@ -3,38 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro Inspección Mensual - ACCESS (Consolidado Botiquines)</title>
+    <title>Registro Inspección Mensual - ACCESS (Nube Centralizada)</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Librería para generar Excel -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <!-- SDK de Firebase para conexión en tiempo real -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 </head>
 <body class="bg-gray-100 py-6 px-4">
  
     <div class="max-w-5xl mx-auto bg-white p-6 rounded shadow-lg border border-gray-300">
+        <!-- Encabezado corporativo -->
         <div class="flex justify-between items-center border-b-2 border-black pb-4 mb-6">
             <div class="w-2/3">
                 <h1 class="text-lg font-bold uppercase text-gray-800 tracking-tight">REGISTRO DE INSPECCIÓN MENSUAL AL SISTEMA DE SEGURIDAD OPERACIONAL</h1>
-                <p class="text-sm font-semibold text-blue-900 mt-1 uppercase">Consolidado General de Botiquines por Áreas - ACCESS</p>
+                <p class="text-sm font-semibold text-blue-900 mt-1 uppercase">Sistema Multi-Usuario en la Nube - ACCESS</p>
             </div>
             <div class="w-1/3 flex justify-end items-center">
                 <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRF48GAfBiNyZh2fPJF-l8q0Dk1Dqn5tQ2r4g&s" alt="Logo ACCESS" class="h-16 object-contain">
             </div>
         </div>
 
+        <!-- Bloque de Control e Identificación -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 bg-gray-50 p-4 border border-gray-200 rounded">
             <div class="flex flex-col">
                 <label class="text-xs font-bold uppercase text-gray-500">Supervisor Responsable:</label>
-                <select id="inspector" class="border-b-2 border-blue-900 p-1 bg-transparent font-bold text-blue-900 focus:outline-none">
+                <select id="inspector" onchange="autoAsignarArea()" class="border-b-2 border-blue-900 p-1 bg-transparent font-bold text-blue-900 focus:outline-none">
+                    <option value="" disabled selected>Seleccione su nombre...</option>
                     <option value="Mauricio Santibañez">Mauricio Santibañez</option>
                     <option value="Karen Cañete">Karen Cañete</option>
+                    <option value="Victor Vasquez">Victor Vasquez</option>
+                    <option value="Erik Vasquez">Erik Vasquez</option>
+                    <option value="Leticia Lopez">Leticia Lopez</option>
+                    <option value="Fremir Pagua">Fremir Pagua</option>
+                    <option value="Francisco Castillo">Francisco Castillo</option>
+                    <option value="Igley Perez">Igley Perez</option>
+                    <option value="Gerardo Pinto">Gerardo Pinto</option>
+                    <option value="Aaron Ibaca">Aaron Ibaca</option>
+                    <option value="Carolina Navarro">Carolina Navarro</option>
+                    <option value="Catalina Duarte">Catalina Duarte</option>
+                    <option value="Camila Carvajal">Camila Carvajal</option>
                 </select>
             </div>
             <div class="flex flex-col">
                 <label class="text-xs font-bold uppercase text-gray-500">Fecha de inspección:</label>
-                <input type="date" id="fecha" class="border-b-2 border-blue-900 p-1 bg-transparent font-bold focus:outline-none">
+                <input type="date" id="fecha" class="border-b-2 border-blue-900 p-1 bg-transparent font-bold focus:outline-none" onchange="cambiarFechaOArea()">
             </div>
             <div class="flex flex-col">
-                <label class="text-xs font-bold uppercase text-gray-600 bg-blue-100 px-2 py-0.5 rounded self-start mb-1">Área en Evaluación Actual:</label>
-                <select id="areaSeleccionada" onchange="cambiarArea()" class="border-b-2 border-blue-900 p-1 bg-transparent font-bold text-blue-900 focus:outline-none">
+                <label class="text-xs font-bold uppercase text-gray-600 bg-blue-100 px-2 py-0.5 rounded self-start mb-1">Área a Evaluar Actual:</label>
+                <select id="areaSeleccionada" onchange="cambiarFechaOArea()" class="border-b-2 border-blue-900 p-1 bg-transparent font-bold text-blue-900 focus:outline-none">
                     <option value="GERENCIA">GERENCIA</option>
                     <option value="BOVEDA">BÓVEDA</option>
                     <option value="CONVERSION SERVICE">CONVERSION SERVICE</option>
@@ -51,7 +71,13 @@
                 </select>
             </div>
         </div>
+
+        <!-- Indicador de Estado de Sincronización -->
+        <div id="statusNube" class="mb-4 text-xs font-bold text-amber-600 bg-amber-50 border border-amber-200 p-2 rounded text-center uppercase">
+            🔄 Conectando con la base de datos central de ACCESS...
+        </div>
  
+        <!-- Tabla de Inspección Activa -->
         <div class="overflow-x-auto text-[11px] pt-2">
             <table class="w-full border-collapse border-2 border-black">
                 <thead class="bg-blue-900 text-white uppercase">
@@ -63,19 +89,65 @@
                     </tr>
                 </thead>
                 <tbody id="tablaInsumosActivos" class="text-gray-800">
-                    </tbody>
+                    <!-- Dinámico -->
+                </tbody>
             </table>
         </div>
  
-        <div class="mt-6 flex flex-col sm:flex-row gap-4">
-            <button type="button" onclick="exportarExcelConsolidado()" class="flex-1 bg-green-700 text-white font-bold py-4 rounded hover:bg-green-800 transition tracking-[0.1em] uppercase shadow-lg text-center text-sm">
-                📊 Finalizar y Exportar Consolidado a Excel (.xlsx)
+        <!-- Panel de Acciones Sincronizadas -->
+        <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <button type="button" onclick="guardarAreaEnNube()" class="bg-blue-900 text-white font-bold py-4 rounded hover:bg-blue-800 transition tracking-[0.1em] uppercase shadow-lg text-sm">
+                💾 Guardar Solo Mi Área en la Nube
+            </button>
+            <button type="button" onclick="exportarExcelGlobal()" class="bg-green-700 text-white font-bold py-4 rounded hover:bg-green-800 transition tracking-[0.1em] uppercase shadow-lg text-sm">
+                📊 Descargar Excel Consolidado Global
             </button>
         </div>
     </div>
  
     <script>
-        // Definición técnica de los 16 insumos institucionales
+        // CONFIGURACIÓN DE FIREBASE (Reemplaza con tus llaves reales)
+        const firebaseConfig = {
+            apiKey: "TU_API_KEY",
+            authDomain: "tu-proyecto.firebaseapp.com",
+            databaseURL: "https://tu-proyecto-default-rtdb.firebaseio.com",
+            projectId: "tu-proyecto",
+            storageBucket: "tu-proyecto.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456:web:abcd"
+        };
+        
+        // Relación Supervisor -> Área por defecto
+        const mapeoAreas = {
+            "Mauricio Santibañez": "MANTENIMIENTO",
+            "Karen Cañete": "GERENCIA",
+            "Victor Vasquez": "BOVEDA",
+            "Erik Vasquez": "CONVERSION SERVICE",
+            "Leticia Lopez": "TI",
+            "Fremir Pagua": "BPO SANTANDER",
+            "Francisco Castillo": "BPO CHILE",
+            "Igley Perez": "PICKING",
+            "Gerardo Pinto": "BUSQUEDA",
+            "Aaron Ibaca": "INDEXACION",
+            "Carolina Navarro": "PRODUCCION",
+            "Catalina Duarte": "INGRESOS",
+            "Camila Carvajal": "TRANSPORTE"
+        };
+
+        let db = null;
+        try {
+            if(firebaseConfig.apiKey !== "TU_API_KEY") {
+                firebase.initializeApp(firebaseConfig);
+                db = firebase.database();
+                document.getElementById('statusNube').innerHTML = "🟢 Conectado con la Nube. Los datos se actualizan en tiempo real.";
+                document.getElementById('statusNube').className = "mb-4 text-xs font-bold text-green-700 bg-green-50 border border-green-200 p-2 rounded text-center uppercase";
+            } else {
+                document.getElementById('statusNube').innerHTML = "⚠️ Modo Demostración Local (Falta configurar credenciales de Firebase en el código)";
+            }
+        } catch(e) {
+            console.error("Error al conectar a Firebase", e);
+        }
+
         const estructuraInsumos = [
             { id: 1, nombre: "Manual de primeros auxilios", desc: "Guía básica o manual de primeros auxilios en formato físico, legible y disponible.", inicial: "OK" },
             { id: 2, nombre: "Alfileres de gancho", desc: "Set de alfileres de seguridad mecánicos para fijación de vendajes.", inicial: "X" },
@@ -95,124 +167,152 @@
             { id: 16, nombre: "Guantes de examen médico (caja)", desc: "Caja de guantes desechables de nitrilo o látex para protección biológica.", inicial: "OK" }
         ];
 
-        // Lista de las 13 áreas del recinto
         const areasRecinto = [
             "GERENCIA", "BOVEDA", "CONVERSION SERVICE", "TI", "MANTENIMIENTO", 
             "BPO SANTANDER", "BPO CHILE", "PICKING", "BUSQUEDA", "INDEXACION", 
             "PRODUCCION", "INGRESOS", "TRANSPORTE"
         ];
 
-        // Base de datos temporal en memoria viva del navegador
-        let baseDatosInspeccion = {};
+        let memoriaLocal = {};
 
-        // Inicializar la estructura con los datos por defecto del PDF de mayo
-        function inicializarBaseDatos() {
-            document.getElementById('fecha').valueAsDate = new Date();
-            
+        function inicializarEstructuraBase() {
             areasRecinto.forEach(area => {
-                baseDatosInspeccion[area] = {};
+                memoriaLocal[area] = {};
                 estructuraInsumos.forEach(insumo => {
-                    baseDatosInspeccion[area][`item_${insumo.id}_st`] = insumo.inicial;
-                    baseDatosInspeccion[area][`item_${insumo.id}_ob`] = insumo.inicial === "X" ? "Faltante según levantamiento mensual" : "";
+                    memoriaLocal[area][`item_${insumo.id}_st`] = insumo.inicial;
+                    memoriaLocal[area][`item_${insumo.id}_ob`] = insumo.inicial === "X" ? "Faltante según levantamiento" : "";
                 });
+                memoriaLocal[area]["supervisor"] = "No inspeccionado aún";
             });
         }
 
-        // Renderizar la tabla interactiva según el área seleccionada
-        function renderizarTabla() {
+        function autoAsignarArea() {
+            const supervisorSeleccionado = document.getElementById("inspector").value;
+            const areaAsignada = mapeoAreas[supervisorSeleccionado];
+            if(areaAsignada) {
+                document.getElementById("areaSeleccionada").value = areaAsignada;
+                cambiarFechaOArea();
+            }
+        }
+
+        function cargarDatosDeLaNube() {
+            if (!db) { renderizarTablaActiva(); return; }
+            
+            const fechaVal = document.getElementById('fecha').value;
+            const periodo = fechaVal.substring(0, 7);
+
+            db.ref('inspecciones/' + periodo).once('value', (snapshot) => {
+                if (snapshot.exists()) {
+                    const datosNube = snapshot.val();
+                    areasRecinto.forEach(area => {
+                        if (datosNube[area]) {
+                            memoriaLocal[area] = datosNube[area];
+                        }
+                    });
+                } else {
+                    inicializarEstructuraBase();
+                }
+                renderizarTablaActiva();
+            });
+        }
+
+        function renderizarTablaActiva() {
             const areaActual = document.getElementById("areaSeleccionada").value;
             const tbody = document.getElementById("tablaInsumosActivos");
             tbody.innerHTML = "";
 
             estructuraInsumos.forEach(insumo => {
-                const estadoGuardado = baseDatosInspeccion[areaActual][`item_${insumo.id}_st`];
-                const observacionGuardada = baseDatosInspeccion[areaActual][`item_${insumo.id}_ob`];
+                const est = memoriaLocal[areaActual][`item_${insumo.id}_st`] || "OK";
+                const obs = memoriaLocal[areaActual][`item_${insumo.id}_ob`] || "";
 
                 const fila = document.createElement("tr");
                 fila.innerHTML = `
                     <td class="border border-black p-2 font-bold bg-gray-50 text-center">${insumo.nombre}</td>
                     <td class="border border-black p-2 italic text-gray-600">${insumo.desc}</td>
                     <td class="border border-black p-2 text-center text-xl">
-                        <select onchange="guardarCambioEnCaliente(${insumo.id}, 'st', this.value)" class="w-full bg-white text-center cursor-pointer font-bold focus:bg-yellow-50">
-                            <option value="OK" ${estadoGuardado === 'OK' ? 'selected' : ''}>✔️ OK</option>
-                            <option value="X" ${estadoGuardado === 'X' ? 'selected' : ''}>✖️ X</option>
-                            <option value="N/A" ${estadoGuardado === 'N/A' ? 'selected' : ''}>N/A</option>
+                        <select id="sel_${insumo.id}" class="w-full bg-white text-center cursor-pointer font-bold focus:bg-blue-50">
+                            <option value="OK" ${est === 'OK' ? 'selected' : ''}>OK</option>
+                            <option value="X" ${est === 'X' ? 'selected' : ''}>X</option>
+                            <option value="N/A" ${est === 'N/A' ? 'selected' : ''}>N/A</option>
                         </select>
                     </td>
                     <td class="border border-black p-1">
-                        <input type="text" value="${observacionGuardada}" onchange="guardarCambioEnCaliente(${insumo.id}, 'ob', this.value)" class="w-full outline-none px-1 bg-transparent focus:bg-yellow-50" placeholder="Nota...">
+                        <input type="text" id="obs_${insumo.id}" value="${obs}" class="w-full outline-none px-1 bg-transparent focus:bg-blue-50" placeholder="Nota...">
                     </td>
                 `;
                 tbody.appendChild(fila);
             });
         }
 
-        // Guarda inmediatamente cualquier cambio que hagas en los selects o inputs
-        function guardarCambioEnCaliente(insumoId, tipo, valor) {
+        function guardarAreaEnNube() {
             const areaActual = document.getElementById("areaSeleccionada").value;
-            baseDatosInspeccion[areaActual][`item_${insumoId}_${tipo}`] = valor;
-        }
-
-        // Cambiar de área sin perder la información de las otras
-        function cambiarArea() {
-            renderizarTabla();
-        }
-
-        // Función Principal: Recopila la memoria viva y la convierte a un único Excel ordenado
-        function exportarExcelConsolidado() {
             const inspector = document.getElementById('inspector').value;
-            const fecha = document.getElementById('fecha').value;
+            const fechaVal = document.getElementById('fecha').value;
+            const periodo = fechaVal.substring(0, 7);
 
-            // 1. Crear el arreglo de datos para las filas del Excel
+            if(!inspector) {
+                alert("Por favor, seleccione su nombre de supervisor antes de guardar.");
+                return;
+            }
+
+            estructuraInsumos.forEach(insumo => {
+                memoriaLocal[areaActual][`item_${insumo.id}_st`] = document.getElementById(`sel_${insumo.id}`).value;
+                memoriaLocal[areaActual][`item_${insumo.id}_ob`] = document.getElementById(`obs_${insumo.id}`).value;
+            });
+            memoriaLocal[areaActual]["supervisor"] = inspector;
+            memoriaLocal[areaActual]["ultima_actualizacion"] = fechaVal;
+
+            if (db) {
+                db.ref('inspecciones/' + periodo + '/' + areaActual).set(memoriaLocal[areaActual])
+                .then(() => {
+                    alert(`¡Éxito! Datos del área ${areaActual} guardados correctamente por ${inspector}.`);
+                })
+                .catch(err => alert("Error al guardar en la nube: " + err));
+            } else {
+                alert(`Guardado temporal local para el área ${areaActual}. Conecte Firebase para sincronización multi-usuario.`);
+            }
+        }
+
+        function cambiarFechaOArea() {
+            cargarDatosDeLaNube();
+        }
+
+        function exportarExcelGlobal() {
+            const fechaVal = document.getElementById('fecha').value;
             let filasExcel = [];
 
             areasRecinto.forEach(area => {
-                // Objeto estructurado para cada fila (Área)
                 let registroArea = {
                     "ÁREA / DEPARTAMENTO": area,
-                    "SUPERVISOR": inspector,
-                    "FECHA INSPECCIÓN": fecha
+                    "SUPERVISOR RESPONSABLE": memoriaLocal[area]["supervisor"] || "No Evaluado",
+                    "FECHA ACTUALIZACIÓN": memoriaLocal[area]["ultima_actualizacion"] || "Pendiente"
                 };
 
-                // Añadir cada uno de los 16 insumos como columnas de datos directos
                 estructuraInsumos.forEach(insumo => {
-                    const est = baseDatosInspeccion[area][`item_${insumo.id}_st`];
-                    const obs = baseDatosInspeccion[area][`item_${insumo.id}_ob`];
+                    const est = memoriaLocal[area][`item_${insumo.id}_st`] || "OK";
+                    const obs = memoriaLocal[area][`item_${insumo.id}_ob`] || "";
                     
-                    // Columna de Estado del Insumo
                     registroArea[`${insumo.nombre} (ESTADO)`] = est;
-                    // Columna de Observación del Insumo
-                    registroArea[`${insumo.nombre} (OBSERVACIONES)`] = obs ? obs : "Sin novedades";
+                    registroArea[`${insumo.nombre} (OBSERVACIÓN)`] = obs;
                 });
 
                 filasExcel.push(registroArea);
             });
 
-            // 2. Procesamiento y generación del Libro mediante SheetJS
             const libroTrabajo = XLSX.utils.book_new();
             const hojaTrabajo = XLSX.utils.json_to_sheet(filasExcel);
 
-            // Ajustar automáticamente el ancho de las columnas para que el Excel sea legible
-            const anchosColumnas = [
-                { wch: 25 }, // Área
-                { wch: 20 }, // Supervisor
-                { wch: 18 }, // Fecha
-                // Patrón repetitivo para los 16 elementos (Estado y Obs)
-                ...Array(16).fill([{ wch: 28 }, { wch: 35 }]).flat()
-            ];
-            hojaTrabajo['!cols'] = anchosColumnas;
+            const anchos = [{ wch: 25 }, { wch: 25 }, { wch: 20 }, ...Array(16).fill([{ wch: 28 }, { wch: 35 }]).flat()];
+            hojaTrabajo['!cols'] = anchos;
 
-            // Adjuntar hoja al libro
-            XLSX.utils.book_append_sheet(libroTrabajo, hojaTrabajo, "Consolidado Botiquines");
-
-            // 3. Descarga del archivo con nombre dinámico estandarizado
-            XLSX.writeFile(libroTrabajo, `CONSOLIDADO_INSPECCION_BOTIQUINES_${fecha}.xlsx`);
+            XLSX.utils.book_append_sheet(libroTrabajo, hojaTrabajo, "Consolidado Global");
+            XLSX.writeFile(libroTrabajo, `REPORTE_GLOBAL_BOTIQUINES_${fechaVal.substring(0,7)}.xlsx`);
         }
 
-        // Ejecución al iniciar la PWA
         window.onload = function() {
-            inicializarBaseDatos();
-            renderizarTabla();
+            document.getElementById('fecha').valueAsDate = new Date();
+            inicializarEstructuraBase();
+            cargarDatosDeLaNube();
         };
     </script>
 </body>
