@@ -4,27 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro Inspección Mensual - ACCESS (Generador PDF)</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Librería moderna para generar PDF directamente desde el HTML -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body class="bg-gray-100 py-6 px-4">
  
-    <div id="contenido-pdf" class="max-w-5xl mx-auto bg-white p-8 rounded shadow-lg border border-gray-300">
-        
+    <!-- Contenedor que capturará el PDF -->
+    <div id="contenido-pdf" class="max-w-5xl mx-auto bg-white p-6 rounded shadow-lg border border-gray-300">
+        <!-- Encabezado corporativo -->
         <div class="flex justify-between items-center border-b-2 border-black pb-4 mb-6">
             <div class="w-2/3">
                 <h1 class="text-lg font-bold uppercase text-gray-800 tracking-tight">REGISTRO DE INSPECCIÓN MENSUAL AL SISTEMA DE SEGURIDAD OPERACIONAL</h1>
-                <p class="text-sm font-semibold text-blue-900 mt-1 uppercase">Reporte Oficial de Inspección - ACCESS</p>
+                <p class="text-sm font-semibold text-blue-900 mt-1 uppercase">Sistema de Registro Local - ACCESS</p>
             </div>
             <div class="w-1/3 flex justify-end items-center">
                 <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRF48GAfBiNyZh2fPJF-l8q0Dk1Dqn5tQ2r4g&s" alt="Logo ACCESS" class="h-16 object-contain">
             </div>
         </div>
 
+        <!-- Bloque de Control e Identificación -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 bg-gray-50 p-4 border border-gray-200 rounded">
             <div class="flex flex-col">
                 <label class="text-xs font-bold uppercase text-gray-500">Supervisor Responsable:</label>
-                <select id="inspector" class="border-b-2 border-blue-900 p-1 bg-transparent font-bold text-blue-900 focus:outline-none cursor-pointer">
+                <select id="inspector" class="border-b-2 border-blue-900 p-1 bg-transparent font-bold text-blue-900 focus:outline-none">
                     <option value="" disabled selected>Seleccione su nombre...</option>
                     <option value="Mauricio Santibañez">Mauricio Santibañez</option>
                     <option value="Karen Cañete">Karen Cañete</option>
@@ -47,8 +51,8 @@
                 <input type="date" id="fecha" class="border-b-2 border-blue-900 p-1 bg-transparent font-bold focus:outline-none">
             </div>
             <div class="flex flex-col">
-                <label class="text-xs font-bold uppercase text-gray-500">Área a Evaluar:</label>
-                <select id="areaSeleccionada" class="border-b-2 border-blue-900 p-1 bg-transparent font-bold text-blue-900 focus:outline-none cursor-pointer">
+                <label class="text-xs font-bold uppercase text-gray-600 bg-blue-100 px-2 py-0.5 rounded self-start mb-1">Área a Evaluar Actual:</label>
+                <select id="areaSeleccionada" class="border-b-2 border-blue-900 p-1 bg-transparent font-bold text-blue-900 focus:outline-none">
                     <option value="" disabled selected>Seleccione el área...</option>
                     <option value="GERENCIA">GERENCIA</option>
                     <option value="BOVEDA">BÓVEDA</option>
@@ -67,6 +71,7 @@
             </div>
         </div>
  
+        <!-- Tabla de Inspección Activa -->
         <div class="overflow-x-auto text-[11px] pt-2">
             <table class="w-full border-collapse border-2 border-black">
                 <thead class="bg-blue-900 text-white uppercase">
@@ -78,10 +83,12 @@
                     </tr>
                 </thead>
                 <tbody id="tablaInsumosActivos" class="text-gray-800">
-                    </tbody>
+                    <!-- Dinámico -->
+                </tbody>
             </table>
         </div>
 
+        <!-- Sección de Firmas para cierre formal en el PDF -->
         <div class="mt-12 grid grid-cols-2 gap-12 pt-8 text-center text-xs border-t border-gray-200 uppercase font-bold">
             <div>
                 <div class="border-t border-black w-48 mx-auto mt-4 pt-1">Firma Supervisor</div>
@@ -92,6 +99,7 @@
         </div>
     </div>
  
+    <!-- Panel de Acciones (Fuera del contenedor del PDF para que no se imprima el botón) -->
     <div class="max-w-5xl mx-auto mt-6">
         <button type="button" onclick="generarPDF()" class="w-full bg-red-700 text-white font-bold py-4 rounded hover:bg-red-800 transition tracking-[0.1em] uppercase shadow-lg text-sm flex items-center justify-center gap-2">
             📄 Generar Reporte en PDF
@@ -118,7 +126,7 @@
             { id: 16, nombre: "Guantes de examen médico (caja)", desc: "Caja de guantes desechables de nitrilo o látex para protección biológica.", inicial: "✔️" }
         ];
 
-        function renderizarTabla() {
+        function renderizarTablaActiva() {
             const tbody = document.getElementById("tablaInsumosActivos");
             tbody.innerHTML = "";
 
@@ -128,14 +136,14 @@
                     <td class="border border-black p-2 font-bold bg-gray-50 text-center">${insumo.nombre}</td>
                     <td class="border border-black p-2 italic text-gray-600">${insumo.desc}</td>
                     <td class="border border-black p-2 text-center text-xl">
-                        <select class="w-full bg-white text-center cursor-pointer font-bold focus:outline-none">
+                        <select class="w-full bg-white text-center cursor-pointer font-bold focus:bg-blue-50">
                             <option value="✔️" ${insumo.inicial === '✔️' ? 'selected' : ''}>✔️</option>
                             <option value="✖️" ${insumo.inicial === '✖️' ? 'selected' : ''}>✖️</option>
                             <option value="N/A" ${insumo.inicial === 'N/A' ? 'selected' : ''}>N/A</option>
                         </select>
                     </td>
                     <td class="border border-black p-1">
-                        <input type="text" value="${insumo.inicial === '✖️' ? 'Faltante según levantamiento' : ''}" class="w-full outline-none px-1 bg-transparent" placeholder="Nota...">
+                        <input type="text" value="${insumo.inicial === '✖️' ? 'Faltante según levantamiento' : ''}" class="w-full outline-none px-1 bg-transparent focus:bg-blue-50" placeholder="Nota...">
                     </td>
                 `;
                 tbody.appendChild(fila);
@@ -147,30 +155,29 @@
             const area = document.getElementById('areaSeleccionada').value;
             const fecha = document.getElementById('fecha').value;
 
-            // Validaciones básicas antes de imprimir
-            if (!supervisor) { alert("Por favor, seleccione el Nombre del Supervisor."); return; }
-            if (!area) { alert("Por favor, seleccione el Área a evaluar."); return; }
-            if (!fecha) { alert("Por favor, seleccione la Fecha."); return; }
+            // Validaciones antes de exportar
+            if(!supervisor) { alert("Por favor, seleccione el Supervisor Responsable."); return; }
+            if(!area) { alert("Por favor, seleccione el Área a Evaluar."); return; }
+            if(!fecha) { alert("Por favor, ingrese la Fecha de inspección."); return; }
 
             const elemento = document.getElementById('contenido-pdf');
             
-            // Opciones de configuración para una óptima exportación a PDF
+            // Opciones de configuración optimizadas para que mantenga estilos CSS
             const opciones = {
-                margin:       0.5,
-                filename:     `INSPECCION_BOTIQUIN_${area}_${fecha}.pdf`,
+                margin:       [0.4, 0.4, 0.4, 0.4], // Margen prudente para hojas Carta
+                filename:     `INSPECCION_${area}_${fecha}.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true },
+                html2canvas:  { scale: 2, useCORS: true, logging: false },
                 jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
             };
 
-            // Ejecuta la conversión de HTML a PDF
+            // Genera y descarga el PDF de forma directa
             html2pdf().set(opciones).from(elemento).save();
         }
 
         window.onload = function() {
-            // Asigna la fecha actual por defecto al abrir la aplicación
             document.getElementById('fecha').valueAsDate = new Date();
-            renderizarTabla();
+            renderizarTablaActiva();
         };
     </script>
 </body>
