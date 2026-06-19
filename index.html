@@ -33,7 +33,7 @@
                 <select id="inspector" class="border-b-2 border-blue-900 p-1 bg-transparent font-bold text-blue-900 focus:outline-none">
                     <option value="" disabled selected>Seleccione su nombre...</option>
                     <option value="Mauricio Santibañez">Mauricio Santibañez</option>
-                    <option value="Karen Cañete">Karen Cañete</option>
+                    <option value="Karin Ortiz">Karin Ortiz</option>
                     <option value="Victor Vasquez">Victor Vasquez</option>
                     <option value="Erik Vasquez">Erik Vasquez</option>
                     <option value="Leticia Lopez">Leticia Lopez</option>
@@ -54,7 +54,7 @@
             </div>
             <div class="flex flex-col">
                 <label class="text-xs font-bold uppercase text-gray-600 bg-blue-100 px-2 py-0.5 rounded self-start mb-1">Área a Evaluar Actual:</label>
-                <select id="areaSeleccionada" class="border-b-2 border-blue-900 p-1 bg-transparent font-bold text-blue-900 focus:outline-none">
+                <select id="areaSeleccionada" onchange="cargarDatosPorArea()" class="border-b-2 border-blue-900 p-1 bg-transparent font-bold text-blue-900 focus:outline-none">
                     <option value="" disabled selected>Seleccione el área...</option>
                     <option value="GERENCIA">GERENCIA</option>
                     <option value="BOVEDA">BÓVEDA</option>
@@ -81,4 +81,76 @@
  
         <div class="overflow-x-auto text-[11px] pt-2">
             <table class="w-full border-collapse border-2 border-black">
-                <thead class="bg-blue-900
+                <thead class="bg-blue-900 text-white uppercase">
+                    <tr>
+                        <th class="border border-black p-2 w-1/3 text-center">ELEMENTO / INSUMO EVALUADO</th>
+                        <th class="border border-black p-2 w-1/2 text-left">CRITERIO / ESPECIFICACIÓN TÉCNICA</th>
+                        <th class="border border-black p-2 w-24 text-center">ESTADO</th>
+                        <th class="border border-black p-2">COMENTARIOS / OBSERVACIONES</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaInsumosActivos" class="text-gray-800">
+                    </tbody>
+            </table>
+        </div>
+
+        <div id="panel-acciones" class="mt-6">
+            <button type="button" onclick="generarReporteGeneralPDF()" class="w-full bg-red-700 text-white font-bold py-4 rounded hover:bg-red-800 transition tracking-[0.1em] uppercase shadow-lg text-sm flex items-center justify-center gap-2">
+                📄 Generar Reporte Completo en PDF
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Mapeo base de insumos de botiquín estándar
+        const insumosBaseBotiquin = [
+            { nombre: "Manual de primeros auxilios", desc: "Guía básica o manual físico, legible y disponible." },
+            { nombre: "Alfileres de gancho", desc: "Set de alfileres mecánicos para fijación de vendajes." },
+            { nombre: "Bandeja de riñón", desc: "Bandeja plástica o de acero inoxidable para recolección de insumos." },
+            { nombre: "Tijeras", desc: "Tijera de trauma o de material resistente apta para cortar de forma segura." },
+            { nombre: "Apósitos adhesivos (1x3 in)", desc: "Bandas adhesivas (parches curitas) de 2.5 x 7.5 cm envasadas individualmente." },
+            { nombre: "Cinta adhesiva en rollo (1 in)", desc: "Cinta médica micropore o esparadrapo de 2.5 cm de ancho." },
+            { nombre: "Compresas de gasa estéril (3x3 in)", desc: "Gasas estériles individuales de 7.5 x 7.5 cm para limpieza." },
+            { nombre: "Vendas de gasa en rollo (1 in)", desc: "Rollos de venda ligeros de 2.5 cm de ancho para retención." },
+            { nombre: "Vendas de gasa en rollo (2 in)", desc: "Rollos de gasa estándar de 5 cm de ancho para cobertura." },
+            { nombre: "Vendas de gasa en rollo (4 in)", desc: "Rollos de gasa anchos de 10 cm para contención y sujeción." },
+            { nombre: "Apósitos absorbentes (4x4 in)", desc: "Apósitos de 10 x 10 cm de alta absorción o vendajes de compresión." },
+            { nombre: "Vendaje triangular", desc: "Paño triangular multiuso en tela resistente para cabestrillos." },
+            { nombre: "Almohadillado para férula", desc: "Material de amortiguación o algodón protector acolchado." },
+            { nombre: "Férulas (Varios tamaños)", desc: "Conjunto estructurado de férulas de inmovilización médica maleables." },
+            { nombre: "Toallitas o spray antiséptico", desc: "Solución de limpieza cutánea en formato de toallitas individuales o spray." },
+            { nombre: "Guantes de examen médico (caja)", desc: "Caja de guantes desechables de nitrilo o látex para protección biológica." }
+        ];
+
+        // Estados iniciales extraídos directamente del archivo global consolidado
+        const matrizEstadosPorArea = {
+            "DEFAULT": ["✔️", "✖️", "✖️", "✔️", "✔️", "✔️", "✔️", "✔️", "✔️", "✔️", "✔️", "✖️", "✖️", "✖️", "✔️", "✔️"]
+        };
+
+        let datosSeguridad = {
+            botiquin: [],
+            desfibrilador: [
+                { nombre: "Estado del Gabinete/Alarma", desc: "Gabinete limpio, cerrado, accesible y con alarma operativa.", inicial: "✔️" },
+                { nombre: "Luz de Estado del DEA (Titileo)", desc: "Indicador visual verde activo (indica batería y autotest OK).", inicial: "✔️" },
+                { nombre: "Vigencia de Parches/Electrodos", desc: "Electrodos adhesivos conectados, sellados y dentro de fecha útil.", inicial: "✔️" },
+                { nombre: "Carga de Batería Principal", desc: "Batería instalada sin alertas de reemplazo ni sonidos de advertencia.", inicial: "✔️" },
+                { nombre: "Kit de Respuesta DEA", desc: "Presencia de tijera de trauma, rasuradora, gasas y mascarilla RCP.", inicial: "✔️" }
+            ],
+            extintores: [
+                { nombre: "Ubicación y Accesibilidad", desc: "Extintor instalado en su lugar asignado y libre de obstáculos.", inicial: "✔️" },
+                { nombre: "Presión del Manómetro", desc: "Aguja indicadora firmemente posicionada dentro de la zona verde.", inicial: "✔️" },
+                { nombre: "Sello de Seguridad y Pasador", desc: "Pasador metálico instalado con su respectivo marchamo intacto.", inicial: "✔️" },
+                { nombre: "Estado de Manguera y Boquilla", desc: "Manguera sin grietas y boquilla libre de obstrucciones.", inicial: "✔️" },
+                { nombre: "Vigencia de la Certificación", desc: "Etiqueta de revisión mensual y mantención anual al día.", inicial: "✔️" }
+            ]
+        };
+
+        let pestanaActual = 'botiquin';
+
+        function cargarDatosPorArea() {
+            const area = document.getElementById('areaSeleccionada').value;
+            // Se aplican las reglas globales de levantamiento: Alfileres, Bandejas, Vendajes Triangulares y Férulas inician en '✖️'
+            const estados = matrizEstadosPorArea[area] || matrizEstadosPorArea["DEFAULT"];
+            
+            datosSeguridad.botiquin = insumosBaseBotiquin.map((insumo, index) => {
+                const estadoInicial
