@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro Inspección Mensual - ACCESS (Versión Final)</title>
-    <!-- Tailwind CSS para la interfaz de pantalla -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Librería html2pdf.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         /* Forzar reglas de salto de página a nivel global para el motor del PDF */
@@ -18,10 +16,8 @@
 </head>
 <body class="bg-gray-100 py-6 px-4">
  
-    <!-- FORMULARIO INTERACTIVO EN PANTALLA -->
     <div id="formulario-pantalla" class="max-w-5xl mx-auto bg-white p-6 rounded shadow-lg border border-gray-300">
         
-        <!-- Encabezado corporativo -->
         <div class="flex justify-between items-center border-b-2 border-black pb-4 mb-6">
             <div class="w-2/3">
                 <h1 class="text-lg font-bold uppercase text-gray-800 tracking-tight">REGISTRO DE INSPECCIÓN MENSUAL AL SISTEMA DE SEGURIDAD OPERACIONAL</h1>
@@ -32,14 +28,13 @@
             </div>
         </div>
 
-        <!-- Bloque de Control e Identificación -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 bg-gray-50 p-4 border border-gray-200 rounded">
             <div class="flex flex-col">
                 <label class="text-xs font-bold uppercase text-gray-500">Supervisor Responsable:</label>
                 <select id="inspector" class="border-b-2 border-blue-900 p-1 bg-transparent font-bold text-blue-900 focus:outline-none">
                     <option value="" disabled selected>Seleccione su nombre...</option>
                     <option value="Mauricio Santibañez">Mauricio Santibañez</option>
-                    <option value="Karen Cañete">Karen Cañete</option>
+                    <option value="Karin Ortiz">Karin Ortiz</option>
                     <option value="Victor Vasquez">Victor Vasquez</option>
                     <option value="Erik Vasquez">Erik Vasquez</option>
                     <option value="Leticia Lopez">Leticia Lopez</option>
@@ -79,7 +74,6 @@
             </div>
         </div>
  
-        <!-- Tabla en Pantalla -->
         <div class="overflow-x-auto text-[11px] pt-2">
             <table class="w-full border-collapse border-2 border-black">
                 <thead class="bg-blue-900 text-white uppercase">
@@ -91,14 +85,12 @@
                     </tr>
                 </thead>
                 <tbody id="tablaInsumosActivos" class="text-gray-800">
-                    <!-- Elementos cargados dinámicamente -->
-                </tbody>
+                    </tbody>
             </table>
         </div>
 
-        <!-- Botón de Ejecución -->
         <div id="panel-acciones" class="mt-6">
-            <button type="button" onclick="generarPDFFix()" class="w-full bg-red-700 text-white font-bold py-4 rounded hover:bg-red-600 transition tracking-[0.1em] uppercase shadow-lg text-sm flex items-center justify-center gap-2">
+            <button type="button" onclick="generarPDFFix()" class="w-full bg-red-700 text-white font-bold py-4 rounded hover:bg-red-800 transition tracking-[0.1em] uppercase shadow-lg text-sm flex items-center justify-center gap-2">
                 📄 Generar Reporte en PDF Ajustado
             </button>
         </div>
@@ -112,7 +104,7 @@
             { id: 4, nombre: "Tijeras", desc: "Tijera de trauma o de material resistente apta para cortar de forma segura.", inicial: "✔️" },
             { id: 5, nombre: "Apósitos adhesivos (1x3 in)", desc: "Bandas adhesivas (parches curitas) de 2.5 x 7.5 cm envasadas individualmente.", inicial: "✔️" },
             { id: 6, nombre: "Cinta adhesiva en rollo (1 in)", desc: "Cinta médica micropore o esparadrapo de 2.5 cm de ancho.", inicial: "✔️" },
-            { id: 7, nombre: "Compresas de gasa estéril (3x3 in)", desc: "Gasas estériles individuales de 7.5 x 7.5 cm para limpieza y cobertura.", inicial: "✔️" },
+            { id: 7, fontStyle: "", nombre: "Compresas de gasa estéril (3x3 in)", desc: "Gasas estériles individuales de 7.5 x 7.5 cm para limpieza y cobertura.", inicial: "✔️" },
             { id: 8, nombre: "Vendas de gasa en rollo (1 in)", desc: "Rollos de venda ligeros de 2.5 cm de ancho para retención mecánica.", inicial: "✔️" },
             { id: 9, nombre: "Vendas de gasa en rollo (2 in)", desc: "Rollos de gasa estándar de 5 cm de ancho para cobertura intermedia.", inicial: "✔️" },
             { id: 10, nombre: "Vendas de gasa en rollo (4 in)", desc: "Rollos de gasa anchos de 10 cm para contención y sujeción.", inicial: "✔️" },
@@ -153,14 +145,24 @@
             const area = document.getElementById('areaSeleccionada').value;
             const fecha = document.getElementById('fecha').value;
 
-            if(!supervisor) { alert("Por favor, seleccione el Supervisor Responsable."); return; }
-            if(!area) { alert("Por favor, seleccione el Área a Evaluar."); return; }
-            if(!fecha) { alert("Por favor, ingrese la Fecha de inspección."); return; }
+            if (!supervisor) {
+                alert("Por favor, seleccione el Supervisor Responsable.");
+                return;
+            }
 
-            // 1. Construir las filas limpias para evitar fallas de renderizado por inputs activos
+            if (!area) {
+                alert("Por favor, seleccione el Área a Evaluar.");
+                return;
+            }
+
+            if (!fecha) {
+                alert("Por favor, ingrese la Fecha de inspección.");
+                return;
+            }
+
             let filasHTML = '';
             const filasPantalla = document.querySelectorAll('#tablaInsumosActivos tr');
-            
+
             filasPantalla.forEach(fila => {
                 const nombre = fila.querySelector('.col-nombre').innerText;
                 const desc = fila.querySelector('.col-desc').innerText;
@@ -168,62 +170,99 @@
                 const observacion = fila.querySelector('.input-obs').value.trim();
 
                 filasHTML += `
-                    <tr style="page-break-inside: avoid !important; break-inside: avoid !important;">
-                        <td style="border: 1px solid #000000; padding: 7px; font-weight: bold; background-color: #f9fafb; text-align: center; font-size: 11px; width: 25%;">${nombre}</td>
-                        <td style="border: 1px solid #000000; padding: 7px; font-style: italic; color: #4b5563; font-size: 11px; width: 45%; text-align: left;">${desc}</td>
-                        <td style="border: 1px solid #000000; padding: 7px; text-align: center; font-size: 15px; font-weight: bold; width: 10%;">${estado}</td>
-                        <td style="border: 1px solid #000000; padding: 7px; font-size: 11px; color: #111827; width: 20%; text-align: left;">${observacion}</td>
+                    <tr style="page-break-inside:avoid !important; break-inside:avoid !important;">
+                        <td style="border:1px solid #000; padding:7px; font-weight:bold; background:#f9fafb; text-align:center; font-size:11px; width:22%; word-wrap:break-word; overflow-wrap:break-word; white-space:normal;">
+                            ${nombre}
+                        </td>
+                        <td style="border:1px solid #000; padding:7px; font-style:italic; color:#4b5563; font-size:11px; width:43%; text-align:left; word-wrap:break-word; overflow-wrap:break-word; white-space:normal;">
+                            ${desc}
+                        </td>
+                        <td style="border:1px solid #000; padding:7px; text-align:center; font-size:15px; font-weight:bold; width:10%;">
+                            ${estado}
+                        </td>
+                        <td style="border:1px solid #000; padding:7px; font-size:11px; width:25%; text-align:left; word-wrap:break-word; overflow-wrap:break-word; white-space:normal;">
+                            ${observacion}
+                        </td>
                     </tr>
                 `;
             });
 
-            // 2. Clon de renderizado aislado a 1000px reales para dar holgura exacta
             const contenedorClon = document.createElement('div');
-            contenedorClon.style.width = "1000px"; 
-            contenedorClon.style.padding = "17px";
+            contenedorClon.style.width = "800px";
+            contenedorClon.style.padding = "15px";
             contenedorClon.style.backgroundColor = "#ffffff";
             contenedorClon.style.fontFamily = "Arial, sans-serif";
 
+            document.body.appendChild(contenedorClon);
+
+            contenedorClon.style.position = "absolute";
+            contenedorClon.style.left = "-9999px";
+            contenedorClon.style.top = "0";
+
             contenedorClon.innerHTML = `
-                <!-- Encabezado -->
-                <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; border-bottom: 2px solid #000000; padding-bottom: 10px;">
+                <style>
+                    table{
+                        width:100%;
+                        border-collapse:collapse;
+                        table-layout:fixed;
+                    }
+                    td, th{
+                        word-wrap:break-word;
+                        overflow-wrap:break-word;
+                        white-space:normal;
+                    }
+                    tr{
+                        page-break-inside:avoid !important;
+                        break-inside:avoid !important;
+                    }
+                    thead{
+                        display:table-header-group;
+                    }
+                    tfoot{
+                        display:table-footer-group;
+                    }
+                </style>
+
+                <table style="width:100%; border-collapse:collapse; margin-bottom:20px; border-bottom:2px solid #000;">
                     <tr>
-                        <td style="width: 75%; text-align: left; vertical-align: middle;">
-                            <h1 style="font-size: 15px; font-weight: bold; margin: 0; color: #111827; text-transform: uppercase; line-height: 1.3;">REGISTRO DE INSPECCIÓN MENSUAL AL SISTEMA DE SEGURIDAD OPERACIONAL</h1>
-                            <p style="font-size: 11px; font-weight: bold; color: #1e3a8a; margin: 4px 0 0 0; text-transform: uppercase;">Reporte Oficial de Inspección - ACCESS</p>
+                        <td style="width:75%; text-align:left; vertical-align:middle;">
+                            <h1 style="font-size:15px; font-weight:bold; margin:0; color:#111827; text-transform:uppercase; line-height:1.3;">
+                                REGISTRO DE INSPECCIÓN MENSUAL AL SISTEMA DE SEGURIDAD OPERACIONAL
+                            </h1>
+                            <p style="font-size:11px; font-weight:bold; color:#1e3a8a; margin-top:4px; text-transform:uppercase;">
+                                Reporte Oficial de Inspección - ACCESS
+                            </p>
                         </td>
-                        <td style="width: 25%; text-align: right; vertical-align: middle;">
-                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRF48GAfBiNyZh2fPJF-l8q0Dk1Dqn5tQ2r4g&s" style="height: 55px; object-fit: contain;">
+                        <td style="width:25%; text-align:right; vertical-align:middle;">
+                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRF48GAfBiNyZh2fPJF-l8q0Dk1Dqn5tQ2r4g&s" style="height:55px; object-fit:contain;">
                         </td>
                     </tr>
                 </table>
 
-                <!-- Bloque Datos -->
-                <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; background-color: #f9fafb; border: 1px solid #e5e7eb;">
+                <table style="width:100%; margin-bottom:20px; background:#f9fafb; border:1px solid #e5e7eb;">
                     <tr>
-                        <td style="padding: 10px; font-size: 11px; width: 33.33%;">
-                            <span style="color: #6b7280; font-weight: bold; text-transform: uppercase; font-size: 10px;">Supervisor Responsable:</span><br>
-                            <span style="font-size: 12px; font-weight: bold; color: #1e3a8a;">${supervisor}</span>
+                        <td style="padding:10px; width:33%;">
+                            <div style="font-size:10px; font-weight:bold; color:#6b7280; text-transform:uppercase;">Supervisor Responsable</div>
+                            <div style="font-size:12px; font-weight:bold; color:#1e3a8a;">${supervisor}</div>
                         </td>
-                        <td style="padding: 10px; font-size: 11px; width: 33.33%;">
-                            <span style="color: #6b7280; font-weight: bold; text-transform: uppercase; font-size: 10px;">Fecha de Inspección:</span><br>
-                            <span style="font-size: 12px; font-weight: bold;">${fecha}</span>
+                        <td style="padding:10px; width:33%;">
+                            <div style="font-size:10px; font-weight:bold; color:#6b7280; text-transform:uppercase;">Fecha de Inspección</div>
+                            <div style="font-size:12px; font-weight:bold;">${fecha}</div>
                         </td>
-                        <td style="padding: 10px; font-size: 11px; width: 33.33%;">
-                            <span style="color: #4b5563; font-weight: bold; text-transform: uppercase; font-size: 10px; background-color: #dbeafe; padding: 2px 6px; border-radius: 3px;">Área Evaluada:</span><br>
-                            <span style="font-size: 12px; font-weight: bold; color: #1e3a8a;">${area}</span>
+                        <td style="padding:10px; width:33%;">
+                            <div style="font-size:10px; font-weight:bold; color:#4b5563; text-transform:uppercase;">Área Evaluada</div>
+                            <div style="font-size:12px; font-weight:bold; color:#1e3a8a;">${area}</div>
                         </td>
                     </tr>
                 </table>
 
-                <!-- Tabla Principal -->
-                <table style="width: 100%; border-collapse: collapse; border: 2px solid #000000;">
+                <table style="width:100%; table-layout:fixed; border-collapse:collapse; border:2px solid #000;">
                     <thead>
-                        <tr style="background-color: #1e3a8a; color: #ffffff; font-size: 11px; text-transform: uppercase;">
-                            <th style="border: 1px solid #000000; padding: 8px;">ELEMENTO / INSUMO</th>
-                            <th style="border: 1px solid #000000; padding: 8px; text-align: left;">DESCRIPCIÓN Y ESPECIFICACIÓN TÉCNICA</th>
-                            <th style="border: 1px solid #000000; padding: 8px;">ESTADO</th>
-                            <th style="border: 1px solid #000000; padding: 8px; text-align: left;">COMENTARIOS / OBSERVACIONES</th>
+                        <tr style="background:#1e3a8a; color:#fff; text-transform:uppercase; font-size:11px;">
+                            <th style="border:1px solid #000; padding:8px; width:22%;">Elemento / Insumo</th>
+                            <th style="border:1px solid #000; padding:8px; width:43%; text-align:left;">Descripción y Especificación Técnica</th>
+                            <th style="border:1px solid #000; padding:8px; width:10%;">Estado</th>
+                            <th style="border:1px solid #000; padding:8px; width:25%; text-align:left;">Comentarios / Observations</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -231,40 +270,62 @@
                     </tbody>
                 </table>
 
-                <!-- Firmas fijas que respetan el salto de página -->
-                <table style="width: 100%; border-collapse: collapse; margin-top: 50px; font-size: 11px; font-weight: bold; text-transform: uppercase; text-align: center; page-break-inside: avoid !important; break-inside: avoid !important;">
+                <table style="width:100%; margin-top:50px; page-break-inside:avoid !important;">
                     <tr>
-                        <td style="width: 50%; padding-top: 40px;">
-                            <div style="border-top: 1px solid #000000; width: 200px; margin: 0 auto; padding-top: 5px;">Firma Supervisor</div>
+                        <td style="width:50%; text-align:center; padding-top:40px;">
+                            <div style="width:200px; border-top:1px solid #000; margin:auto; padding-top:5px; font-size:11px; font-weight:bold;">
+                                Firma Supervisor
+                            </div>
                         </td>
-                        <td style="width: 50%; padding-top: 40px;">
-                            <div style="border-top: 1px solid #000000; width: 200px; margin: 0 auto; padding-top: 5px;">Firma Jefatura / Operaciones</div>
+                        <td style="width:50%; text-align:center; padding-top:40px;">
+                            <div style="width:200px; border-top:1px solid #000; margin:auto; padding-top:5px; font-size:11px; font-weight:bold;">
+                                Firma Jefatura / Operaciones
+                            </div>
                         </td>
                     </tr>
                 </table>
             `;
 
-            // 3. Opciones avanzadas de renderizado corregidas
+            const imagenes = contenedorClon.querySelectorAll('img');
+
+            await Promise.all(
+                [...imagenes].map(img => {
+                    if (img.complete) {
+                        return Promise.resolve();
+                    }
+                    return new Promise(resolve => {
+                        img.onload = resolve;
+                        img.onerror = resolve;
+                    });
+                })
+            );
+
             const opciones = {
-                margin:       [0.4, 0.4, 0.4, 0.4], 
+                margin:       10, 
                 filename:     `INSPECCION_${area}_${fecha}.pdf`,
-                image:        { type: 'jpeg', quality: 0.98 },
+                image:        { type: 'jpeg', quality: 1 },
                 html2canvas:  { 
-                    scale: 1.5,         // Escala perfecta para no sobrepasar la hoja
+                    scale: 2, 
                     useCORS: true, 
+                    allowTaint: true, 
                     logging: false,
-                    windowWidth: 900,   // Holgura necesaria para capturar los 850px sin cortes
                     scrollX: 0,
-                    scrollY: 0          
+                    scrollY: 0,
+                    windowWidth: contenedorClon.scrollWidth,
+                    windowHeight: contenedorClon.scrollHeight
                 },
-                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+                pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
-            // 4. Espera controlada de 600ms para asegurar la correcta carga del logo
-            await new Promise(resolve => setTimeout(resolve, 600));
+            await new Promise(resolve => setTimeout(resolve, 300));
 
-            // 5. Ejecutar y esperar asincrónicamente la generación final limpia
-            await html2pdf().set(opciones).from(contenedorClon).save();
+            await html2pdf()
+                .set(opciones)
+                .from(contenedorClon)
+                .save();
+
+            document.body.removeChild(contenedorClon);
         }
 
         window.onload = function() {
