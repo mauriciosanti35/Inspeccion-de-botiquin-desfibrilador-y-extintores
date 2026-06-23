@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro Inspección Mensual - ACCESS (Versión Final)</title>
+    <title>Inspección de Botiquín-Desfibrilador y Extintores - ACCESS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        /* Forzar reglas de salto de página a nivel global para el motor del PDF */
         .page-break-avoid, tr {
             page-break-inside: avoid !important;
             break-inside: avoid !important;
@@ -24,7 +23,7 @@
                 <p class="text-sm font-semibold text-blue-900 mt-1 uppercase">Sistema de Registro Local - ACCESS</p>
             </div>
             <div class="w-1/3 flex justify-end items-center">
-                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRF48GAfBiNyZh2fPJF-l8q0Dk1Dqn5tQ2r4g&s" alt="Logo ACCESS" class="h-16 object-contain">
+                <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAYAAABw4pVUAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAI9SURBVHhe7d0xihxBFMVR9womJuYGBm7gInre7mYidm7gInre7mKCgYmJuXv9KiYIdX9b9bSg6v8PD97g0fX6vX6IIdS9X+6Wh8PhcDgcDofD4XA4HA6Hw+FwOBwOh8PhcDgcDofD4XA4HA4Hw+FwOBwOh8PhcDgcDofD4XA4HA6Hw+FwOBwOh+FwOBwOh8PhcDgcDofD4XA4HA6Hw+FwOBwOh8PhcDgcDofD4XA4HA6Hw+FwOBwOh8PhcDgcDofD4XA4HA6Hw+FwOBwOh8PhcDgcDofD4XA4HA6Hw+FwOBwOh8PhcDgcDofDv6zX7/Xz7Z7/H9bL/er9cvf5uPst9w9390v186F6/673/S9vIe6X6vlQ/XyoPj5UHx+qjw/Vx4fq40P18aH6+FB9fKg+PlQfH6qPD9XHh+rjQ/Xxofr4UH18qD4+VB8fqo8P1ceH6uND9fGh+vhQfXyoPj5UHx+qjw/Vx4fq40P18aH6+FB9fKg+PlQfH6qPD9XHh+rjQ/Xxofr4UH18qD4+VB8fqo8P1ceH6vOHu/vV+z3eH6vPh909YfV6uX96f0gAAsEIBIIgEAxCIBCEQSAIg0AwCIFAEAhGIBCEgSAQDEEgGIRAIAiDQBAGgSAMAsEgBAJBGAgCwRAEggEIBIEgCANDAAn8O7G7v97b3986X3v6Z8RgepDAPwB7AtMTmN6u99Xp8S/626enmO676+NfdgR7u99SAtM9gYFp789f2gPTPYHpX/S3D/mFmP4AsCcwPYHp7XpfAAn9Fv8A0xOYnsD0BKa9P39pD0z3BKZ/0d8+5BdiAsAIAsEgBAJBGAgCwRAEggEIBIEgCANDAAn8O7EwDAKBIBAMQiAQhIEgEAxCIBAEghEIBGEgCARhIAgEQxAIBiEQCMLwX9br9Xv9AALBCAQCMRD4Cw6Hw+FwOBwOh8PhcDgcDofD4XA4HA6Hw+FwOBwOh8PhcDgcDofD4XA4HA6Hw+FwOBwOh+FwOBwOh8PhcDgcDofD4XA4HA6Hw+FwOBwOh8PhcDgcDofD4XA4HA6Hw+FwOBwOh8PhcDgcDofD4XA4HA6Hw+FwOBwOh8PhcDgcDofD4XA4HA6Hw+FwOBwOh8P/gR8mFAiX2XbZ0gAAAABJRU5ErkJggg==" alt="Logo ACCESS" class="h-16 object-contain">
             </div>
         </div>
 
@@ -34,7 +33,7 @@
                 <select id="inspector" class="border-b-2 border-blue-900 p-1 bg-transparent font-bold text-blue-900 focus:outline-none">
                     <option value="" disabled selected>Seleccione su nombre...</option>
                     <option value="Mauricio Santibañez">Mauricio Santibañez</option>
-                    <option value="Karin Ortiz">Karin Ortiz</option>
+                    <option value="Karen Cañete">Karen Cañete</option>
                     <option value="Victor Vasquez">Victor Vasquez</option>
                     <option value="Erik Vasquez">Erik Vasquez</option>
                     <option value="Leticia Lopez">Leticia Lopez</option>
@@ -104,7 +103,7 @@
             { id: 4, nombre: "Tijeras", desc: "Tijera de trauma o de material resistente apta para cortar de forma segura.", inicial: "✔️" },
             { id: 5, nombre: "Apósitos adhesivos (1x3 in)", desc: "Bandas adhesivas (parches curitas) de 2.5 x 7.5 cm envasadas individualmente.", inicial: "✔️" },
             { id: 6, nombre: "Cinta adhesiva en rollo (1 in)", desc: "Cinta médica micropore o esparadrapo de 2.5 cm de ancho.", inicial: "✔️" },
-            { id: 7, fontStyle: "", nombre: "Compresas de gasa estéril (3x3 in)", desc: "Gasas estériles individuales de 7.5 x 7.5 cm para limpieza y cobertura.", inicial: "✔️" },
+            { id: 7, nombre: "Compresas de gasa estéril (3x3 in)", desc: "Gasas estériles individuales de 7.5 x 7.5 cm para limpieza y cobertura.", inicial: "✔️" },
             { id: 8, nombre: "Vendas de gasa en rollo (1 in)", desc: "Rollos de venda ligeros de 2.5 cm de ancho para retención mecánica.", inicial: "✔️" },
             { id: 9, nombre: "Vendas de gasa en rollo (2 in)", desc: "Rollos de gasa estándar de 5 cm de ancho para cobertura intermedia.", inicial: "✔️" },
             { id: 10, nombre: "Vendas de gasa en rollo (4 in)", desc: "Rollos de gasa anchos de 10 cm para contención y sujeción.", inicial: "✔️" },
@@ -115,6 +114,9 @@
             { id: 15, nombre: "Toallitas o spray antiséptico", desc: "Solución de limpieza cutánea en formato de toallitas individuales o spray.", inicial: "✔️" },
             { id: 16, nombre: "Guantes de examen médico (caja)", desc: "Caja de guantes desechables de nitrilo o látex para protección biológica.", inicial: "✔️" }
         ];
+
+        // Definición explícita de la cadena Base64 del Logo para reuso en el clon
+        const LOGO_BASE64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAYAAABw4pVUAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAI9SURBVHhe7d0xihxBFMVR9womJuYGBm7gInre7mYidm7gInre7mKCgYmJuXv9KiYIdX9b9bSg6v8PD97g0fX6vX6IIdS9X+6Wh8PhcDgcDofD4XA4HA6Hw+FwOBwOh8PhcDgcDofD4XA4HA6Hw+FwOBwOh8PhcDgcDofD4XA4HA6Hw+FwOBwOh8PhcDgcDofD4XA4HA6Hw+FwOBwOh8PhcDgcDofD4XA4HA6Hw+FwOBwOh8PhcDgcDofD4XA4HA6Hw+FwOBwOh8PhcDgcDofD4XA4HA6Hw+FwOBwOh8PhcDgcDofDv6zX7/Xz7Z7/H9bL/er9cvf5uPst9w9390v186F6/673/S9vIe6X6vlQ/XyoPj5UHx+qjw/Vx4fq40P18aH6+FB9fKg+PlQfH6qPD9XHh+rjQ/Xxofr4UH18qD4+VB8fqo8P1ceH6uND9fGh+vhQfXyoPj5UHx+qjw/Vx4fq40P18aH6+FB9fKg+PlQfH6qPD9XHh+rjQ/Xxofr4UH18qD4+VB8fqo8P1ceH6vOHu/vV+z3eH6vPh909YfV6uX96f0gAAsEIBIIgEAxCIBCEQSAIg0AwCIFAEAhGIBCEgSAQDEEgGIRAIAiDQBAGgSAMAsEgBAJBGAgCwRAEggEIBIEgCANDAAn8O7G7v97b3986X3v6Z8RgepDAPwB7AtMTmN6u99Xp8S/626enmO676+NfdgR7u99SAtM9gYFp789f2gPTPYHpX/S3D/mFmP4AsCcwPYHp7XpfAAn9Fv8A0xOYnsD0BKa9P39pD0z3BKZ/0d8+5BdiAsAIAsEgBAJBGAgCwRAEggEIBIEgCANDAAn8O7EwDAKBIBAMQiAQhIEgEAxCIBAEghEIBGEgCARhIAgEQxAIBiEQCMLwX9br9Xv9AALBCAQCMRD4Cw6Hw+FwOBwOh8PhcDgcDofD4XA4HA6Hw+FwOBwOh8PhcDgcDofD4XA4HA6Hw+FwOBwOh8PhcDgcDofD4XA4HA6Hw+FwOBwOh8PhcDgcDofD4XA4HA6Hw+FwOBwOh8PhcDgcDofD4XA4HA6Hw+FwOBwOh8PhcDgcDofD4XA4HA6Hw+FwOBwOh8P/gR8mFAiX2XbZ0gAAAABJRU5ErkJggg==";
 
         function renderizarTablaActiva() {
             const tbody = document.getElementById("tablaInsumosActivos");
@@ -145,18 +147,8 @@
             const area = document.getElementById('areaSeleccionada').value;
             const fecha = document.getElementById('fecha').value;
 
-            if (!supervisor) {
-                alert("Por favor, seleccione el Supervisor Responsable.");
-                return;
-            }
-
-            if (!area) {
-                alert("Por favor, seleccione el Área a Evaluar.");
-                return;
-            }
-
-            if (!fecha) {
-                alert("Por favor, ingrese la Fecha de inspección.");
+            if (!supervisor || !area || !fecha) {
+                alert("Por favor, complete todos los campos de control (Supervisor, Área y Fecha).");
                 return;
             }
 
@@ -170,7 +162,7 @@
                 const observacion = fila.querySelector('.input-obs').value.trim();
 
                 filasHTML += `
-                    <tr style="page-break-inside:avoid !important; break-inside:avoid !important;">
+                    <tr>
                         <td style="border:1px solid #000; padding:7px; font-weight:bold; background:#f9fafb; text-align:center; font-size:11px; width:22%; word-wrap:break-word; overflow-wrap:break-word; white-space:normal;">
                             ${nombre}
                         </td>
@@ -189,38 +181,21 @@
 
             const contenedorClon = document.createElement('div');
             contenedorClon.style.width = "800px";
-            contenedorClon.style.padding = "15px";
+            contenedorClon.style.padding = "20px";
             contenedorClon.style.backgroundColor = "#ffffff";
             contenedorClon.style.fontFamily = "Arial, sans-serif";
-
-            document.body.appendChild(contenedorClon);
-
             contenedorClon.style.position = "absolute";
             contenedorClon.style.left = "-9999px";
             contenedorClon.style.top = "0";
 
+            document.body.appendChild(contenedorClon);
+
             contenedorClon.innerHTML = `
                 <style>
-                    table{
-                        width:100%;
-                        border-collapse:collapse;
-                        table-layout:fixed;
-                    }
-                    td, th{
-                        word-wrap:break-word;
-                        overflow-wrap:break-word;
-                        white-space:normal;
-                    }
-                    tr{
-                        page-break-inside:avoid !important;
-                        break-inside:avoid !important;
-                    }
-                    thead{
-                        display:table-header-group;
-                    }
-                    tfoot{
-                        display:table-footer-group;
-                    }
+                    table { width:100%; border-collapse:collapse; table-layout:fixed; }
+                    td, th { word-wrap:break-word; overflow-wrap:break-word; white-space:normal; }
+                    tr { page-break-inside:avoid !important; break-inside:avoid !important; }
+                    thead { display:table-header-group; }
                 </style>
 
                 <table style="width:100%; border-collapse:collapse; margin-bottom:20px; border-bottom:2px solid #000;">
@@ -234,7 +209,7 @@
                             </p>
                         </td>
                         <td style="width:25%; text-align:right; vertical-align:middle;">
-                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRF48GAfBiNyZh2fPJF-l8q0Dk1Dqn5tQ2r4g&s" style="height:55px; object-fit:contain;">
+                            <img src="${LOGO_BASE64}" style="height:55px; object-fit:contain;">
                         </td>
                     </tr>
                 </table>
@@ -262,7 +237,7 @@
                             <th style="border:1px solid #000; padding:8px; width:22%;">Elemento / Insumo</th>
                             <th style="border:1px solid #000; padding:8px; width:43%; text-align:left;">Descripción y Especificación Técnica</th>
                             <th style="border:1px solid #000; padding:8px; width:10%;">Estado</th>
-                            <th style="border:1px solid #000; padding:8px; width:25%; text-align:left;">Comentarios / Observations</th>
+                            <th style="border:1px solid #000; padding:8px; width:25%; text-align:left;">Comentarios / Observaciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -286,45 +261,25 @@
                 </table>
             `;
 
-            const imagenes = contenedorClon.querySelectorAll('img');
-
-            await Promise.all(
-                [...imagenes].map(img => {
-                    if (img.complete) {
-                        return Promise.resolve();
-                    }
-                    return new Promise(resolve => {
-                        img.onload = resolve;
-                        img.onerror = resolve;
-                    });
-                })
-            );
+            // Esperar brevemente a que el DOM interno procese la imagen de manera local
+            await new Promise(resolve => setTimeout(resolve, 350));
 
             const opciones = {
                 margin:       10, 
                 filename:     `INSPECCION_${area}_${fecha}.pdf`,
-                image:        { type: 'jpeg', quality: 1 },
+                image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { 
                     scale: 2, 
                     useCORS: true, 
-                    allowTaint: true, 
+                    allowTaint: true,
                     logging: false,
-                    scrollX: 0,
-                    scrollY: 0,
-                    windowWidth: contenedorClon.scrollWidth,
-                    windowHeight: contenedorClon.scrollHeight
+                    windowWidth: 800
                 },
                 pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] },
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
-            await new Promise(resolve => setTimeout(resolve, 300));
-
-            await html2pdf()
-                .set(opciones)
-                .from(contenedorClon)
-                .save();
-
+            await html2pdf().set(opciones).from(contenedorClon).save();
             document.body.removeChild(contenedorClon);
         }
 
