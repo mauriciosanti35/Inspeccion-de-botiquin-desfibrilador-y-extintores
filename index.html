@@ -5,11 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inspección de Botiquín-Desfibrilador y Extintores - ACCESS</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        .page-break-avoid, tr {
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
+        /* Reglas especiales exclusivas para cuando se genera el PDF/Impresión */
+        @media print {
+            body {
+                background-color: #ffffff !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            /* Oculta los botones y elementos de interfaz en el PDF */
+            #panel-acciones, .no-print {
+                display: none !important;
+            }
+            /* Asegura que el contenedor ocupe todo el ancho disponible */
+            #formulario-pantalla {
+                max-w: 100% !important;
+                width: 100% !important;
+                box-shadow: none !important;
+                border: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            /* Evita que las filas de la tabla se corten a la mitad entre páginas */
+            tr {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+            thead {
+                display: table-header-group !important;
+            }
         }
     </style>
 </head>
@@ -23,7 +47,7 @@
                 <p class="text-sm font-semibold text-blue-900 mt-1 uppercase">Sistema de Registro Local - ACCESS</p>
             </div>
             <div class="w-1/3 flex justify-end items-center">
-                <img id="logo-corporativo" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRF48GAfBiNyZh2fPJF-l8q0Dk1Dqn5tQ2r4g&s" crossorigin="anonymous" alt="Logo ACCESS" class="h-16 object-contain">
+                <img id="logo-corporativo" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRF48GAfBiNyZh2fPJF-l8q0Dk1Dqn5tQ2r4g&s" alt="Logo ACCESS" class="h-16 object-contain">
             </div>
         </div>
 
@@ -88,9 +112,18 @@
             </table>
         </div>
 
-        <div id="panel-acciones" class="mt-6">
-            <button type="button" onclick="generarPDFFix()" class="w-full bg-red-700 text-white font-bold py-4 rounded hover:bg-red-800 transition tracking-[0.1em] uppercase shadow-lg text-sm flex items-center justify-center gap-2">
-                📄 Generar Reporte en PDF Ajustado
+        <div class="mt-16 grid grid-cols-2 gap-8 text-center pt-8 page-break-avoid">
+            <div>
+                <div class="w-48 border-t border-black mx-auto pt-2 font-bold text-xs uppercase text-gray-700">Firma Supervisor</div>
+            </div>
+            <div>
+                <div class="w-48 border-t border-black mx-auto pt-2 font-bold text-xs uppercase text-gray-700">Firma Jefatura / Operaciones</div>
+            </div>
+        </div>
+
+        <div id="panel-acciones" class="mt-8">
+            <button type="button" onclick="ejecutarImpresionNativa()" class="w-full bg-blue-700 text-white font-bold py-4 rounded hover:bg-blue-800 transition tracking-[0.1em] uppercase shadow-lg text-sm flex items-center justify-center gap-2">
+                📄 Imprimir o Guardar como PDF
             </button>
         </div>
     </div>
@@ -103,7 +136,7 @@
             { id: 4, nombre: "Tijeras", desc: "Tijera de trauma o de material resistente apta para cortar de forma segura.", inicial: "✔️" },
             { id: 5, nombre: "Apósitos adhesivos (1x3 in)", desc: "Bandas adhesivas (parches curitas) de 2.5 x 7.5 cm envasadas individualmente.", inicial: "✔️" },
             { id: 6, nombre: "Cinta adhesiva en rollo (1 in)", desc: "Cinta médica micropore o esparadrapo de 2.5 cm de ancho.", inicial: "✔️" },
-            { id: 7, fontStyle: "", nombre: "Compresas de gasa estéril (3x3 in)", desc: "Gasas estériles individuales de 7.5 x 7.5 cm para limpieza y cobertura.", inicial: "✔️" },
+            { id: 7, nombre: "Compresas de gasa estéril (3x3 in)", desc: "Gasas estériles individuales de 7.5 x 7.5 cm para limpieza y cobertura.", inicial: "✔️" },
             { id: 8, nombre: "Vendas de gasa en rollo (1 in)", desc: "Rollos de venda ligeros de 2.5 cm de ancho para retención mecánica.", inicial: "✔️" },
             { id: 9, nombre: "Vendas de gasa en rollo (2 in)", desc: "Rollos de gasa estándar de 5 cm de ancho para cobertura intermedia.", inicial: "✔️" },
             { id: 10, nombre: "Vendas de gasa en rollo (4 in)", desc: "Rollos de gasa anchos de 10 cm para contención y sujeción.", inicial: "✔️" },
@@ -112,7 +145,7 @@
             { id: 13, nombre: "Almohadillado para férula", desc: "Material de amortiguación o algodón protector acolchado previo a inmovilizar.", inicial: "✖️" },
             { id: 14, nombre: "Férulas (Varios tamaños)", desc: "Conjunto estructurado de férulas de inmovilización médica maleables.", inicial: "✖️" },
             { id: 15, nombre: "Toallitas o spray antiséptico", desc: "Solución de limpieza cutánea en formato de toallitas individuales o spray.", inicial: "✔️" },
-            { id: 16, nombre: "Guantes de examen médico (caja)", desc: "Caja de guantes desechables de nitrilo o látex para protección biológica.", inicial: "✔️" }
+            { id: 16, fontStyle: "", nombre: "Guantes de examen médico (caja)", desc: "Caja de guantes desechables de nitrilo o látex para protección biológica.", inicial: "✔️" }
         ];
 
         function renderizarTablaActiva() {
@@ -122,175 +155,42 @@
             estructuraInsumos.forEach(insumo => {
                 const fila = document.createElement("tr");
                 fila.innerHTML = `
-                    <td class="border border-black p-2 font-bold bg-gray-50 text-center col-nombre">${insumo.nombre}</td>
-                    <td class="border border-black p-2 italic text-gray-600 col-desc">${insumo.desc}</td>
-                    <td class="border border-black p-2 text-center text-xl">
-                        <select class="w-full bg-white text-center cursor-pointer font-bold focus:outline-none select-estado">
+                    <td class="border border-black p-2 font-bold bg-gray-50 text-center">${insumo.nombre}</td>
+                    <td class="border border-black p-2 italic text-gray-600 text-left">${insumo.desc}</td>
+                    <td class="border border-black p-2 text-center text-lg font-bold bg-white">
+                        <select onchange="this.dataset.val=this.value" class="w-full bg-transparent text-center cursor-pointer font-bold focus:outline-none">
                             <option value="✔️" ${insumo.inicial === '✔️' ? 'selected' : ''}>✔️</option>
                             <option value="✖️" ${insumo.inicial === '✖️' ? 'selected' : ''}>✖️</option>
                             <option value="N/A" ${insumo.inicial === 'N/A' ? 'selected' : ''}>N/A</option>
                         </select>
                     </td>
-                    <td class="border border-black p-1">
-                        <input type="text" value="${insumo.inicial === '✖️' ? 'Faltante según levantamiento' : ''}" class="w-full outline-none px-1 bg-transparent input-obs" placeholder="Nota...">
+                    <td class="border border-black p-1 bg-white">
+                        <input type="text" value="${insumo.inicial === '✖️' ? 'Faltante según levantamiento' : ''}" class="w-full outline-none px-1 bg-transparent" placeholder="...">
                     </td>
                 `;
                 tbody.appendChild(fila);
             });
         }
 
-        async function generarPDFFix() {
+        function ejecutarImpresionNativa() {
             const supervisor = document.getElementById('inspector').value;
             const area = document.getElementById('areaSeleccionada').value;
             const fecha = document.getElementById('fecha').value;
 
             if (!supervisor || !area || !fecha) {
-                alert("Por favor, complete todos los campos de control (Supervisor, Área y Fecha).");
+                alert("Por favor, complete los datos obligatorios: Supervisor, Área y Fecha antes de continuar.");
                 return;
             }
 
-            // Capturar la URL real de la imagen en pantalla
-            const srcImagenReal = document.getElementById('logo-corporativo').src;
+            // Cambiar el título del documento temporalmente para que el PDF se guarde con el nombre correcto por defecto
+            const tituloOriginal = document.title;
+            document.title = `INSPECCION_${area}_${fecha}`;
 
-            let filasHTML = '';
-            const filasPantalla = document.querySelectorAll('#tablaInsumosActivos tr');
+            // Llama a la ventana nativa del sistema operativo
+            window.print();
 
-            filasPantalla.forEach(fila => {
-                const nombre = fila.querySelector('.col-nombre').innerText;
-                const desc = fila.querySelector('.col-desc').innerText;
-                const estado = fila.querySelector('.select-estado').value;
-                const observacion = fila.querySelector('.input-obs').value.trim();
-
-                filasHTML += `
-                    <tr>
-                        <td style="border:1px solid #000; padding:7px; font-weight:bold; background:#f9fafb; text-align:center; font-size:11px; width:22%; word-wrap:break-word; overflow-wrap:break-word; white-space:normal;">
-                            ${nombre}
-                        </td>
-                        <td style="border:1px solid #000; padding:7px; font-style:italic; color:#4b5563; font-size:11px; width:43%; text-align:left; word-wrap:break-word; overflow-wrap:break-word; white-space:normal;">
-                            ${desc}
-                        </td>
-                        <td style="border:1px solid #000; padding:7px; text-align:center; font-size:15px; font-weight:bold; width:10%;">
-                            ${estado}
-                        </td>
-                        <td style="border:1px solid #000; padding:7px; font-size:11px; width:25%; text-align:left; word-wrap:break-word; overflow-wrap:break-word; white-space:normal;">
-                            ${observacion}
-                        </td>
-                    </tr>
-                `;
-            });
-
-            const contenedorClon = document.createElement('div');
-            contenedorClon.style.width = "790px"; // Ancho exacto optimizado para evitar desbordes en A4
-            contenedorClon.style.padding = "20px";
-            contenedorClon.style.backgroundColor = "#ffffff";
-            contenedorClon.style.fontFamily = "Arial, sans-serif";
-            contenedorClon.style.position = "absolute";
-            contenedorClon.style.left = "-9999px";
-            contenedorClon.style.top = "0";
-
-            document.body.appendChild(contenedorClon);
-
-            contenedorClon.innerHTML = `
-                <style>
-                    table { width:100%; border-collapse:collapse; table-layout:fixed; }
-                    td, th { word-wrap:break-word; overflow-wrap:break-word; white-space:normal; }
-                    tr { page-break-inside:avoid !important; break-inside:avoid !important; }
-                    thead { display:table-header-group; }
-                </style>
-
-                <table style="width:100%; border-collapse:collapse; margin-bottom:20px; border-bottom:2px solid #000;">
-                    <tr>
-                        <td style="width:75%; text-align:left; vertical-align:middle;">
-                            <h1 style="font-size:15px; font-weight:bold; margin:0; color:#111827; text-transform:uppercase; line-height:1.3;">
-                                REGISTRO DE INSPECCIÓN MENSUAL AL SISTEMA DE SEGURIDAD OPERACIONAL
-                            </h1>
-                            <p style="font-size:11px; font-weight:bold; color:#1e3a8a; margin-top:4px; text-transform:uppercase;">
-                                Reporte Oficial de Inspección - ACCESS
-                            </p>
-                        </td>
-                        <td style="width:25%; text-align:right; vertical-align:middle;">
-                            <img src="${srcImagenReal}" crossorigin="anonymous" style="height:55px; width:auto; object-fit:contain;">
-                        </td>
-                    </tr>
-                </table>
-
-                <table style="width:100%; margin-bottom:20px; background:#f9fafb; border:1px solid #e5e7eb;">
-                    <tr>
-                        <td style="padding:10px; width:33%;">
-                            <div style="font-size:10px; font-weight:bold; color:#6b7280; text-transform:uppercase;">Supervisor Responsable</div>
-                            <div style="font-size:12px; font-weight:bold; color:#1e3a8a;">${supervisor}</div>
-                        </td>
-                        <td style="padding:10px; width:33%;">
-                            <div style="font-size:10px; font-weight:bold; color:#6b7280; text-transform:uppercase;">Fecha de Inspección</div>
-                            <div style="font-size:12px; font-weight:bold;">${fecha}</div>
-                        </td>
-                        <td style="padding:10px; width:33%;">
-                            <div style="font-size:10px; font-weight:bold; color:#4b5563; text-transform:uppercase;">Área Evaluada</div>
-                            <div style="font-size:12px; font-weight:bold; color:#1e3a8a;">${area}</div>
-                        </td>
-                    </tr>
-                </table>
-
-                <table style="width:100%; table-layout:fixed; border-collapse:collapse; border:2px solid #000;">
-                    <thead>
-                        <tr style="background:#1e3a8a; color:#fff; text-transform:uppercase; font-size:11px;">
-                            <th style="border:1px solid #000; padding:8px; width:22%;">Elemento / Insumo</th>
-                            <th style="border:1px solid #000; padding:8px; width:43%; text-align:left;">Descripción y Especificación Técnica</th>
-                            <th style="border:1px solid #000; padding:8px; width:10%;">Estado</th>
-                            <th style="border:1px solid #000; padding:8px; width:25%; text-align:left;">Comentarios / Observaciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${filasHTML}
-                    </tbody>
-                </table>
-
-                <table style="width:100%; margin-top:50px; page-break-inside:avoid !important;">
-                    <tr>
-                        <td style="width:50%; text-align:center; padding-top:40px;">
-                            <div style="width:200px; border-top:1px solid #000; margin:auto; padding-top:5px; font-size:11px; font-weight:bold;">
-                                Firma Supervisor
-                            </div>
-                        </td>
-                        <td style="width:50%; text-align:center; padding-top:40px;">
-                            <div style="width:200px; border-top:1px solid #000; margin:auto; padding-top:5px; font-size:11px; font-weight:bold;">
-                                Firma Jefatura / Operaciones
-                            </div>
-                        </td>
-                    </tr>
-                </table>
-            `;
-
-            // Esperar explícitamente a que el clon esté integrado en el DOM
-            await new Promise(resolve => setTimeout(resolve, 250));
-
-            const opciones = {
-                margin:       [10, 10, 10, 10], 
-                filename:     `INSPECCION_${area}_${fecha}.pdf`,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { 
-                    scale: 2, 
-                    useCORS: true, 
-                    allowTaint: false, // Evita corromper el canvas si el origen tiene restricciones estrictas
-                    logging: false,
-                    width: 790
-                },
-                pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-
-            try {
-                // Ejecutar compilación nativa directa
-                await html2pdf().set(opciones).from(contenedorClon).save();
-            } catch (error) {
-                console.error("Error al generar PDF:", error);
-                alert("Hubo un problema al procesar el renderizado del PDF. Se reintentará de forma directa.");
-            } finally {
-                // Limpieza del nodo oculto para mantener la memoria del navegador libre
-                if(contenedorClon && contenedorClon.parentNode) {
-                    document.body.removeChild(contenedorClon);
-                }
-            }
+            // Restaura el título original de la pestaña
+            document.title = tituloOriginal;
         }
 
         window.onload = function() {
